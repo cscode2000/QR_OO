@@ -4,7 +4,9 @@ epc_name="Max Mustermann"
 epc_iban="DE99100200300123456789"
 Path=createunoservice("com.sun.star.util.PathSettings")
 QRencodeExe=Path.module + "/QREncode/qrencode.exe"
-qrfile=Path.work & "/qrcode.png"
+QRCode_X = 8320
+QRCode_Y = 4900
+qrfile=Path.work + "/qrcode.png"
 Doc= thisComponent
 if Doc.getDrawpage().count>2 then
   Doc.getDrawpage().remove(Doc.getDrawpage().getbyindex(2))
@@ -50,8 +52,8 @@ oGraph.AnchorType = com.sun.star.text.TextContentAnchorType.AT_PAGE
 oSize.width=2000
 oSize.height=2000
 oGraph.setSize(oSize)
-oPos.X = 18320
-oPos.Y = 24900
+oPos.X = QRCode_X
+oPos.Y = QRCode_Y
 oGraph.setposition(oPos)
 oGraph.GraphicURL = qrfile
 Doc.getDrawpage().add(oGraph)
@@ -65,8 +67,8 @@ oFrame.HoriOrient = com.sun.star.text.HoriOrientation.NONE
 oFrame.VertOrient = com.sun.star.text.VertOrientation.NONE
 oFrame.HoriOrientRelation = com.sun.star.text.RelOrientation.PAGE_FRAME
 oFrame.VertOrientRelation = com.sun.star.text.RelOrientation.PAGE_FRAME
-oframe.HoriOrientPosition = 18450
-oFrame.VertOrientPosition = 26780
+oframe.HoriOrientPosition = QRCode_X+130
+oFrame.VertOrientPosition = QRCode_Y+1880
 oframe.width = 1700
 oframe.height = 150
 oFrame.AnchorType = com.sun.star.text.TextContentAnchorType.AT_PAGE
