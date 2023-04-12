@@ -1,0 +1,81 @@
+REM  *****  BASIC  *****
+Sub create_QR()
+epc_name="Max Mustermann"
+epc_iban="DE99100200300123456789"
+Path=createunoservice("com.sun.star.util.PathSettings")
+QRencodeExe=Path.module + "/QREncode/qrencode.exe"
+qrfile=Path.work & "/qrcode.png"
+Doc= thisComponent
+if Doc.getDrawpage().count>2 then
+  Doc.getDrawpage().remove(Doc.getDrawpage().getbyindex(2))
+endif
+if Doc.getDrawpage().count>2 then
+  Doc.getDrawpage().remove(Doc.getDrawpage().getbyindex(2))
+endif
+Suche = Doc.createSearchDescriptor
+Suche.SearchRegularExpression = True
+Suche.searchString="Rechnung"
+Found = Doc.findfirst(Suche)
+if IsNull(Found) then exit sub
+
+Suche.searchString="Auftragsnr.+"
+Found = Doc.findfirst(Suche)
+if IsNull(Found) then 
+  Suche.searchString="Datum.+"
+  Found = Doc.findfirst(Suche)
+  if Not IsNull(Found) then epc_rgnr=ltrim(right(Found.string,8))
+else
+  epc_rgnr=ltrim(right(Found.string,8))
+endif
+Suche.searchString="Rechnungsbetrag.+"
+Found = Doc.findfirst(Suche)
+if IsNull(Found) then 
+  Suche.searchString="Gesamtpreis.+"
+  Found = Doc.findfirst(Suche)
+  if Not IsNull(Found) then epc_betrag="EUR" + ltrim(right(Found.string,9))
+else
+  epc_betrag="EUR" + ltrim(right(Found.string,9))
+endif
+crlf=Chr(13) + Chr(10)
+sMsg = "BCD" + crlf + "002" + crlf + "2" + crlf + "SCT" + crlf + crlf + epc_name + crlf + epc_iban + crlf +_
+       epc_betrag + crlf + crlf + crlf + epc_rgnr + crlf + "SEPA EPC Code"
+if epc_rgnr="" or epc_betrag = "" then exit sub
+
+shell(convertfromurl(QRencodeExe), 6, " -lM -s2 -o """ & convertfromurl(qrfile) & """ """ & sMsg & """", True)
+' Grafik einfügen
+Dim oSize As New com.sun.star.awt.Size
+Dim oPos As New com.sun.star.awt.Point
+oGraph = Doc.createInstance("com.sun.star.drawing.GraphicObjectShape")
+oGraph.AnchorType = com.sun.star.text.TextContentAnchorType.AT_PAGE
+oSize.width=2000
+oSize.height=2000
+oGraph.setSize(oSize)
+oPos.X = 18320
+oPos.Y = 24900
+oGraph.setposition(oPos)
+oGraph.GraphicURL = qrfile
+Doc.getDrawpage().add(oGraph)
+
+' Beschriftung unter QR-Code
+oText = Doc.Text
+oCursor = oText.createTextCursor()
+oFrame = Doc.createInstance("com.sun.star.text.TextFrame")
+oframe.setname("QR-Titel")
+oFrame.HoriOrient = com.sun.star.text.HoriOrientation.NONE
+oFrame.VertOrient = com.sun.star.text.VertOrientation.NONE
+oFrame.HoriOrientRelation = com.sun.star.text.RelOrientation.PAGE_FRAME
+oFrame.VertOrientRelation = com.sun.star.text.RelOrientation.PAGE_FRAME
+oframe.HoriOrientPosition = 18450
+oFrame.VertOrientPosition = 26780
+oframe.width = 1700
+oframe.height = 150
+oFrame.AnchorType = com.sun.star.text.TextContentAnchorType.AT_PAGE
+oFrame.TextWrap = com.sun.star.text.WrapTextMode.THROUGHT
+oFrame.BackColor = &Hcccccc
+oText.insertTextContent(oCursor, oFrame, FALSE)
+oFrameCursor=oFrame.createTextCursor()
+oFrameCursor.CharHeight="7"
+oFrameCursor.CharFontName="ArialBlack"
+oFrameCursor.paraAdjust = com.sun.star.style.ParagraphAdjust.CENTER
+oFrameCursor.String="EPC QR"
+end sub
