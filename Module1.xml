@@ -4,8 +4,8 @@ epc_name="Max Mustermann"
 epc_iban="DE99100200300123456789"
 Path=createunoservice("com.sun.star.util.PathSettings")
 QRencodeExe=Path.module + "/QREncode/qrencode.exe"
-QRCode_X = 8320
-QRCode_Y = 4900
+QRCode_X = 18320
+QRCode_Y = 24900
 qrfile=Path.work + "/qrcode.png"
 Doc= thisComponent
 if Doc.getDrawpage().count>2 then
@@ -44,7 +44,7 @@ sMsg = "BCD" + crlf + "002" + crlf + "2" + crlf + "SCT" + crlf + crlf + epc_name
 if epc_rgnr="" or epc_betrag = "" then exit sub
 
 shell(convertfromurl(QRencodeExe), 6, " -lM -s2 -o """ & convertfromurl(qrfile) & """ """ & sMsg & """", True)
-' Grafik einfügen
+' Grafik einfÃ¼gen
 Dim oSize As New com.sun.star.awt.Size
 Dim oPos As New com.sun.star.awt.Point
 oGraph = Doc.createInstance("com.sun.star.drawing.GraphicObjectShape")
